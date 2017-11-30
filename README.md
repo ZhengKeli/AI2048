@@ -1,5 +1,3 @@
-#AI 2048
-
 [2048](https://gabrielecirulli.github.io/2048/) should be a well-known game. If you've never played it, I suggest you to play several times and learn about its game rules.
 
 This is a project making an AI to play the game 2048. To be honest, this is my first try in making AI for a game. (And it is the first practical project about deep learning that succeeds) 
