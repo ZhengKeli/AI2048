@@ -7,30 +7,16 @@ core = EvaluateCore("../graph/core3", "core")
 game1 = GameAI1(core)
 game2 = GameAI2(core, 128)
 
-train_core(
-    core, game1,
-    train_count=2e3,
-    group_size=100,
-    learning_rate=0.005
-)
-
-train_core(
-    core, game1,
-    train_count=2e3,
-    group_size=100,
-    learning_rate=0.003
-)
+# train_core(
+#     core, game1,
+#     train_count=3e3,
+#     group_size=100,
+#     learning_rate=0.003
+# )
 
 train_core(
     core, game2,
     train_count=200,
     group_size=10,
-    learning_rate=0.001
-)
-
-train_core(
-    core, game2,
-    train_count=200,
-    group_size=10,
-    learning_rate=3e-4
+    learning_rate=0.0001
 )

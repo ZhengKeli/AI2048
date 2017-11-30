@@ -23,3 +23,10 @@ The directory `./graph` is storing the well-trained nerve network graph of the c
 The directory `./.idea` and file `./AI2048.iml` are project files of **Intellij IDEA**. If you are using it, you can import this project.
 
 
+# Expected result of the AIs
+Here I place the expected average max rounds of the AIs in tests. This may help you to judge if your own AI works normally.
+- `random` - about 100 rounds
+- `ai1_core1` - about 170 rounds
+- `ai1_core2` - about 300 rounds
+- `ai2_core2` - about 700 rounds
+- `ai2_core3` - about 1000 rounds

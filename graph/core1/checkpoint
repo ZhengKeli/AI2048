@@ -1,0 +1,2 @@
+model_checkpoint_path: "core"
+all_model_checkpoint_paths: "core"
