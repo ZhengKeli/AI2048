@@ -19,7 +19,7 @@ class EvaluateCore(NerveCore):
 
     def create_graph(self):
         with self.graph.as_default():
-            # nerve network
+            # neural network
             board = tf.placeholder(tf.float32, shape=[None, 4, 4], name="board")  # [-1,4,4]
 
             rows = tf.unstack(board, axis=-1)  # 4*[-1,4]
