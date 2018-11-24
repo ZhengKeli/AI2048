@@ -1,91 +1,114 @@
-from abc import ABCMeta, abstractmethod
+from typing import Optional, List
 
-import numpy as np
-
-from game.Action import Action
-from game.Pop import Pop
-from game.utils import get_action_map, apply_pop
+from game.GameComponent import GameAI, GamePlayer, GameComponent, GameInitializer, GameReactor, GameListener
+from logic.Action import Action
+from logic.Board import Board
+from logic.Pop import Pop
 
 
 class Game:
-    __metaclass__ = ABCMeta
-
-    def __init__(self):
-        self.board = None
-        self.action_map = None
-        self.round = 0
-
-        self.last_action = 0
-        self.last_pop = 0
-
-    def begin_loop(self):
-        self.init_game()
-        while True:
-            if not self.next_round():
-                break
-
-    def begin_loop_recorded(self):
-        self.init_game()
-        history = []
-        while True:
-            history.append(self.board)
-            if not self.next_round():
-                history.append(self.board)
-                break
-        return history
-
-    def on_init_board(self):
-        self.board = np.zeros([4, 4], np.int)
-        self.apply_pop()
-        self.apply_pop()
-
-    def init_game(self):
-        self.round = 0
-        self.on_init_board()
-        self.action_map = get_action_map(self.board)
-
-    def next_round(self):
-        self.apply_action()
-        self.apply_pop()
-
-        self.action_map = get_action_map(self.board)
-        if len(self.action_map) == 0:
-            self.on_dead()
-            return False
-
-        self.round += 1
-        return True
-
-    @abstractmethod
-    def on_dead(self):
-        pass
-
-    def apply_action(self):
-        action = self.on_get_action()
-        self.board = self.action_map[action]
-        self.last_action = action
-
-    @abstractmethod
-    def on_get_action(self) -> Action:
-        pass
-
-    def apply_pop(self):
-        pop = self.on_get_pop()
-        self.board = apply_pop(self.board, pop)
-        self.last_pop = pop
-
-    def on_get_pop(self) -> Pop:
-        empty_places = []
-        for row in range(4):
-            for column in range(4):
-                if self.board[row][column] == 0:
-                    empty_places.append((row, column))
-        index = int(np.random.uniform() * len(empty_places))
-        position = empty_places[index]
-
-        if np.random.uniform() < 0.125:
-            value = 2
-        else:
-            value = 1
-
-        return Pop(position, value)
+	def __init__(self, *components: GameComponent):
+		self.listeners: List[GameListener] = []
+		self.initializer = None
+		self.reactor = None
+		self.player = None
+		self.ai = None
+		self.add_components(*components)
+	
+	def add_components(self, *components: GameComponent):
+		for component in components:
+			if isinstance(component, GameListener):
+				component: GameListener
+				self.listeners.append(component)
+			if isinstance(component, GameInitializer):
+				component: GameInitializer
+				self.initializer = component
+			if isinstance(component, GameReactor):
+				component: GameReactor
+				self.reactor: GameReactor = component
+			if isinstance(component, GamePlayer):
+				component: GamePlayer
+				self.player: GamePlayer = component
+			if isinstance(component, GameAI):
+				component: GameAI
+				self.ai: GameAI = component
+	
+	# process
+	
+	def process(self):
+		
+		if self.initializer is None:
+			raise RuntimeError("There's no GameInitializer")
+		if self.reactor is None:
+			raise RuntimeError("There's no GameReactor")
+		if (self.player is None) and (self.ai is None):
+			raise RuntimeError("There's neither GamePlayer nor GameAI")
+		
+		# init
+		board = self.init()
+		self.inited(board)
+		
+		rounds = 0
+		while not board.is_dead():
+			self.new_round(rounds)
+			
+			# action
+			action = self.get_action(board)
+			board.apply_action(action)
+			self.applied_action(action, board)
+			
+			# pop
+			pop = self.get_reaction(board)
+			if pop is not None:
+				board.apply_pop(pop)
+			self.applied_reaction(pop, board)
+			
+			rounds += 1
+		
+		self.dead(rounds, board)
+	
+	# events
+	
+	def init(self) -> Board:
+		return self.initializer.on_init()
+	
+	def inited(self, board: Board):
+		for listener in self.listeners:
+			listener.on_inited(board)
+	
+	def new_round(self, rounds: int):
+		for listener in self.listeners:
+			listener.on_new_round(rounds)
+	
+	def get_action(self, board: Board) -> Action:
+		if self.ai is None:
+			if self.player is None:
+				raise RuntimeError("No action provided!")
+			else:
+				return self.player.on_get_action(board)
+		else:
+			if self.player is None:
+				return self.ai.on_suggest_action(board)
+			else:
+				suggestion = self.ai.on_suggest_action(board)
+				self.ai_suggested(suggestion)
+				return self.player.on_get_action(board)
+	
+	def ai_suggested(self, suggestion: Action):
+		for listener in self.listeners:
+			listener.on_ai_suggested(suggestion)
+	
+	def applied_action(self, action: Action, board: Board):
+		for listener in self.listeners:
+			listener.on_applied_action(action, board)
+	
+	def get_reaction(self, board: Board) -> Optional[Pop]:
+		return self.reactor.on_get_reaction(board)
+	
+	def applied_reaction(self, pop: Pop, board: Board):
+		for listener in self.listeners:
+			listener.on_applied_reaction(pop, board)
+	
+	def dead(self, rounds: int, board: Board):
+		for listener in self.listeners:
+			listener.on_dead(rounds, board)

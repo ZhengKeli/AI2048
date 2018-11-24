@@ -1,3 +1,9 @@
-from game.GameConsole import GameConsole
+from game.Game import Game
+from logic.StandardLogic import StandardLogic
+from ui.ConsoleUI import ConsoleIndicator, ConsolePlayer
 
-GameConsole().begin_loop()
+Game(
+	StandardLogic(),
+	ConsoleIndicator(),
+	ConsolePlayer(),
+).process()

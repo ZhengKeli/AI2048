@@ -1,5 +1,12 @@
-from ai.EvaluateCore import EvaluateCore
-from game.GameAI1 import GameAI1
+from ai.OneStepAI import OneStepAI
+from game.Game import Game
+from logic.StandardLogic import StandardLogic
+from nerve.EvaluateCore import EvaluateCore
+from ui.ConsoleUI import ConsoleIndicator
 
 core = EvaluateCore("../graph/core1", "core")
-GameAI1(core, True).begin_loop()
+Game(
+	StandardLogic(),
+	ConsoleIndicator(),
+	OneStepAI(core)
+).process()
