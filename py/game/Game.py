@@ -91,12 +91,8 @@ class Game:
 				return self.ai.on_suggest_action(board)
 			else:
 				suggestion = self.ai.on_suggest_action(board)
-				self.ai_suggested(suggestion)
+				self.player.on_ai_suggested(suggestion)
 				return self.player.on_get_action(board)
-	
-	def ai_suggested(self, suggestion: Action):
-		for listener in self.listeners:
-			listener.on_ai_suggested(suggestion)
 	
 	def applied_action(self, action: Action, board: Board):
 		for listener in self.listeners:

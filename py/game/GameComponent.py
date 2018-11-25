@@ -21,9 +21,6 @@ class GameListener(GameComponent):
 	def on_new_round(self, rounds: int):
 		pass
 	
-	def on_ai_suggested(self, suggestion: Action):
-		pass
-	
 	def on_applied_action(self, action: Action, board: Board):
 		pass
 	
@@ -52,6 +49,9 @@ class GameReactor(GameComponent):
 
 class GamePlayer(GameComponent):
 	__metaclass__ = ABCMeta
+	
+	def on_ai_suggested(self, suggestion: Action):
+		pass
 	
 	@abstractmethod
 	def on_get_action(self, board: Board) -> Action:

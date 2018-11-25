@@ -16,10 +16,6 @@ class ConsoleIndicator(GameListener):
 		print()
 		print("Round", rounds)
 	
-	def on_ai_suggested(self, suggestion: Action):
-		print()
-		print("AI suggested action:", suggestion)
-	
 	def on_applied_action(self, action: Action, board: Board):
 		print()
 		print(board.matrix)
@@ -38,6 +34,11 @@ class ConsoleIndicator(GameListener):
 
 
 class ConsolePlayer(GamePlayer):
+	
+	def on_ai_suggested(self, suggestion: Action):
+		print()
+		print("AI suggested action:", suggestion)
+	
 	def on_get_action(self, board: Board) -> Action:
 		while True:
 			print(board.matrix)
